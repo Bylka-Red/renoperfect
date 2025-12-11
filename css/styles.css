@@ -910,6 +910,83 @@ ul {
     font-weight: 600;
 }
 
+/* Enhanced map placeholder */
+.map-placeholder--enhanced {
+    padding: var(--spacing-8);
+    gap: var(--spacing-6);
+}
+
+.map-placeholder__icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.map-placeholder__icon svg {
+    width: 40px;
+    height: 40px;
+    margin: 0;
+}
+
+.map-placeholder__content {
+    text-align: center;
+}
+
+.map-placeholder__radius {
+    display: inline-block;
+    background: var(--color-secondary);
+    color: var(--color-white);
+    padding: var(--spacing-2) var(--spacing-5);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-2xl);
+    font-weight: 800;
+    margin-bottom: var(--spacing-3);
+}
+
+.map-placeholder__title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    margin-bottom: var(--spacing-2);
+    opacity: 0.9;
+}
+
+.map-placeholder__address {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    margin-bottom: var(--spacing-1);
+}
+
+.map-placeholder__dept {
+    font-size: var(--font-size-base);
+    opacity: 0.8;
+}
+
+.map-placeholder__cities {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--spacing-2);
+    margin-top: var(--spacing-4);
+    max-width: 400px;
+}
+
+.map-placeholder__cities span {
+    background: rgba(255, 255, 255, 0.15);
+    padding: var(--spacing-1) var(--spacing-3);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    transition: background var(--transition-fast);
+}
+
+.map-placeholder__cities span:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
 /* ========== Contact Section ========== */
 .contact {
     background: var(--color-gray-50);
@@ -1511,16 +1588,49 @@ ul {
     }
 
     .zone__map {
-        height: 300px;
+        height: auto;
+        min-height: 350px;
     }
 
-    .map-placeholder svg {
+    .map-placeholder--enhanced {
+        padding: var(--spacing-6);
+        gap: var(--spacing-4);
+    }
+
+    .map-placeholder__icon {
         width: 60px;
         height: 60px;
     }
 
-    .map-placeholder p {
+    .map-placeholder__icon svg {
+        width: 30px;
+        height: 30px;
+    }
+
+    .map-placeholder__radius {
+        font-size: var(--font-size-xl);
+        padding: var(--spacing-2) var(--spacing-4);
+    }
+
+    .map-placeholder__title {
         font-size: var(--font-size-base);
+    }
+
+    .map-placeholder__address {
+        font-size: var(--font-size-xl);
+    }
+
+    .map-placeholder__dept {
+        font-size: var(--font-size-sm);
+    }
+
+    .map-placeholder__cities {
+        gap: var(--spacing-2);
+    }
+
+    .map-placeholder__cities span {
+        font-size: var(--font-size-xs);
+        padding: var(--spacing-1) var(--spacing-2);
     }
 
     /* ===== Contact Mobile ===== */
