@@ -1,0 +1,27 @@
+{
+  "name": "boltnew-site",
+  "version": "1.0.0",
+  "description": "Site vitrine moderne pour Renoperfect - Réparation de volets, fenêtres et portails au Raincy",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server . -p 3000 -o",
+    "minify": "npm run minify:css && npm run minify:js",
+    "minify:css": "npx csso css/styles.css --output css/styles.min.css",
+    "minify:js": "npx terser js/main.js -c -m -o js/main.min.js",
+    "serve": "npx live-server --port=3000 --host=localhost",
+    "build": "npm run minify",
+    "lighthouse": "npx lighthouse http://localhost:3000 --view --output=html --output-path=./lighthouse-report.html"
+  },
+  "keywords": [
+    "volets",
+    "fenêtres",
+    "portails",
+    "réparation",
+    "Le Raincy",
+    "dépannage"
+  ],
+  "author": "Renoperfect",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {}
+}

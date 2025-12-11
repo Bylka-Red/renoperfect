@@ -1,0 +1,143 @@
+<?php
+/**
+ * BOLTNEW - Contact Form Handler
+ *
+ * Ce fichier est un exemple de traitement du formulaire de contact.
+ * Renommez-le en "contact-handler.php" et configurez-le selon vos besoins.
+ */
+
+// Configuration
+define('CONTACT_EMAIL', 'contact@boltnew.fr'); // EMAIL DE DESTINATION
+define('FROM_EMAIL', 'noreply@boltnew.fr');
+define('SITE_NAME', 'BOLTNEW');
+
+// Headers CORS (si nécessaire)
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST');
+header('Access-Control-Allow-Headers: Content-Type');
+
+// Vérifier la méthode
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['error' => 'Méthode non autorisée']);
+    exit;
+}
+
+// Récupérer les données
+$name = filter_input(INPUT_POST, 'name', FILTER_SANITIZE_STRING);
+$phone = filter_input(INPUT_POST, 'phone', FILTER_SANITIZE_STRING);
+$email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
+$service = filter_input(INPUT_POST, 'service', FILTER_SANITIZE_STRING);
+$message = filter_input(INPUT_POST, 'message', FILTER_SANITIZE_STRING);
+
+// Validation
+$errors = [];
+
+if (empty($name) || strlen($name) < 2) {
+    $errors[] = 'Le nom est requis (minimum 2 caractères)';
+}
+
+if (empty($phone) || !preg_match('/^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/', $phone)) {
+    $errors[] = 'Le numéro de téléphone est invalide';
+}
+
+if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $errors[] = 'L\'adresse email est invalide';
+}
+
+if (empty($message) || strlen($message) < 10) {
+    $errors[] = 'Le message est requis (minimum 10 caractères)';
+}
+
+// Si erreurs, retourner
+if (!empty($errors)) {
+    http_response_code(400);
+    echo json_encode(['errors' => $errors]);
+    exit;
+}
+
+// Protection anti-spam basique (honeypot)
+if (!empty($_POST['website'])) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Spam détecté']);
+    exit;
+}
+
+// Limiter les soumissions (simple rate limiting par IP)
+$ip = $_SERVER['REMOTE_ADDR'];
+$lockFile = sys_get_temp_dir() . '/contact_' . md5($ip) . '.lock';
+
+if (file_exists($lockFile)) {
+    $lastSubmit = filemtime($lockFile);
+    if (time() - $lastSubmit < 60) { // 1 minute minimum entre 2 soumissions
+        http_response_code(429);
+        echo json_encode(['error' => 'Veuillez patienter avant d\'envoyer un nouveau message']);
+        exit;
+    }
+}
+
+// Préparer l'email
+$subject = "[BOLTNEW] Nouveau contact - $name";
+
+$emailBody = "
+Nouveau message de contact depuis BOLTNEW
+
+Nom: $name
+Téléphone: $phone
+Email: " . ($email ?: 'Non fourni') . "
+Service: " . ($service ?: 'Non spécifié') . "
+
+Message:
+$message
+
+---
+IP: {$_SERVER['REMOTE_ADDR']}
+Date: " . date('d/m/Y H:i:s') . "
+";
+
+$headers = [
+    'From: ' . FROM_EMAIL,
+    'Reply-To: ' . ($email ?: FROM_EMAIL),
+    'X-Mailer: PHP/' . phpversion(),
+    'MIME-Version: 1.0',
+    'Content-Type: text/plain; charset=UTF-8'
+];
+
+// Envoyer l'email
+$success = mail(CONTACT_EMAIL, $subject, $emailBody, implode("\r\n", $headers));
+
+if ($success) {
+    // Créer le fichier de lock
+    touch($lockFile);
+
+    // Log (optionnel)
+    error_log("Contact form submitted by $name ($phone)");
+
+    // Réponse succès
+    http_response_code(200);
+    echo json_encode([
+        'success' => true,
+        'message' => 'Merci ! Nous vous recontacterons sous 1 heure.'
+    ]);
+} else {
+    // Erreur lors de l'envoi
+    http_response_code(500);
+    echo json_encode([
+        'error' => 'Erreur lors de l\'envoi. Veuillez réessayer ou nous appeler directement.'
+    ]);
+}
+
+// Optionnel : Sauvegarder dans une base de données
+/*
+try {
+    $pdo = new PDO('mysql:host=localhost;dbname=boltnew', 'username', 'password');
+    $stmt = $pdo->prepare("
+        INSERT INTO contacts (name, phone, email, service, message, ip, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, NOW())
+    ");
+    $stmt->execute([$name, $phone, $email, $service, $message, $_SERVER['REMOTE_ADDR']]);
+} catch (PDOException $e) {
+    error_log("Database error: " . $e->getMessage());
+}
+*/
